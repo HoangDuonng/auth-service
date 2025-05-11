@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <!-- Include all migration files in order -->
+    <changeSet id="1" author="hoangduong">
+        <sqlFile path="classpath:db/migration/V1__init_schema.sql"/>
+    </changeSet>
+    
+    <changeSet id="2" author="hoangduong">
+        <sqlFile path="classpath:db/migration/V2__add_auth_users.sql"/>
+    </changeSet>
+    
+    <changeSet id="3" author="hoangduong">
+        <sqlFile path="classpath:db/migration/V3__add_sample_data.sql"/>
+    </changeSet>
+
+</databaseChangeLog> 

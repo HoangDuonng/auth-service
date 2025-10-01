@@ -1,5 +1,6 @@
 package com.graduationproject.auth_service.dto.response;
 
+import com.graduationproject.common.dto.UserResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,4 +15,6 @@ public class TokenResponseDTO {
     private String refreshToken;
     private String tokenType;
     private Long expiresIn;
+
+    private UserResponseDTO user;
 } 

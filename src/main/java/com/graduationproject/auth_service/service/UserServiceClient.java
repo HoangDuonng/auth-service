@@ -1,6 +1,6 @@
 package com.graduationproject.auth_service.service;
 
-import com.graduationproject.auth_service.dto.response.UserResponseDTO;
+import com.graduationproject.common.dto.UserResponseDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,4 +12,7 @@ public interface UserServiceClient {
 
     @GetMapping("/users/username/{username}")
     UserResponseDTO getUserByUsername(@PathVariable String username);
+
+    @GetMapping("/users/email/{email}")
+    UserResponseDTO getUserByEmail(@PathVariable String email);
 }

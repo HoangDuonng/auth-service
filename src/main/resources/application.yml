@@ -19,34 +19,55 @@ spring:
   liquibase:
     change-log: ${CHANGE_LOG:classpath:db/changelog/db.changelog-master.xml}
     enabled: true
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    virtual-host: ${RABBITMQ_VHOST:/}
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    template:
+      mandatory: true
+    listener:
+      simple:
+        retry:
+          enabled: true
+          initial-interval: 1000
+          max-attempts: 3
+          max-interval: 10000
+          multiplier: 2.0
+        default-requeue-rejected: false
+        auto-startup: true
+        concurrency: 1
+        max-concurrency: 1
+        prefetch: 1
+
+rabbitmq:
+  queue:
+    user-created-auth: user-created-auth-queue
+    auth-login: auth-login-queue
+    auth-login-response: auth-login-response-queue
+  exchange:
+    user-events: user-events-exchange
+    auth-events: auth-events-exchange
+  routing-key:
+    user-created-auth: user.created.auth
+    auth-login: auth.login
+    auth-login-response: auth.login.response
+
+jwt:
+  secret: ${JWT_SECRET:7mCfe6wr7rOBhY6S3vrWyR8dBXFy9iTOmbjlREl0yxASqKgpzKfIl0CGpGjMVuL/O++QZGIBwGQNzyphuN8yyqIbacdY+7n+6KZTY3xQdh16C8Kdzjt01mg6tKywGgaNTG1nLUhQVUb/INOIkqMIk4lVXyTbnGU9RFWCxYvQbHN2/BcaOUQm/SM0Fb6nk96JQZoavlrUqCGyEyoCXXTATjW7bnkEbp5mP3w9p+MvRED5nkGMC7LvMwfag8rOFvTCPcsqjgE+Y/MLfqTJprQpn2nbcMAj2AQAUbtPIY1UXe37IVA2qy/fzs5urnspX37fb6W7bnhIBn4hA6zudvQ==}
+  expiration: ${JWT_EXPIRATION:86400000} # 24 hours in milliseconds
+  refresh-token:
+    expiration: ${JWT_REFRESH_TOKEN_EXPIRATION:604800000} # 7 days in milliseconds
+  key-id: ${JWT_KEY_ID:auth-key-id}
+  issuer: ${JWT_ISSUER:auth-key-id}
 
 server:
   port: ${SERVER_PORT:8081}
   servlet:
     context-path: /api
-
-rabbitmq:
-  host: ${RABBITMQ_HOST:localhost}
-  port: ${RABBITMQ_PORT:5672}
-  username: ${RABBITMQ_USERNAME:guest}
-  password: ${RABBITMQ_PASSWORD:guest}
-  virtual-host: ${RABBITMQ_VHOST:/}
-  publisher-confirm-type: correlated
-  publisher-returns: true
-  template:
-    mandatory: true
-  queue:
-    user-created: ${RABBITMQ_QUEUE_USER_CREATED:user.created}
-  exchange:
-    user-events: ${RABBITMQ_EXCHANGE_USER_EVENTS:user.events}
-  routing-key:
-    user-created: ${RABBITMQ_ROUTING_KEY_USER_CREATED:user.created}
-
-jwt:
-  secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
-  expiration: ${JWT_EXPIRATION:86400000} # 24 hours in milliseconds
-  refresh-token:
-    expiration: ${JWT_REFRESH_TOKEN_EXPIRATION:604800000} # 7 days in milliseconds
 
 logging:
   level:
@@ -54,7 +75,7 @@ logging:
     com.graduationproject: ${LOG_LEVEL:DEBUG}
     org.springframework: INFO
     org.hibernate: INFO
-    org.springframework.amqp: ${LOG_LEVEL:INFO}
+    org.springframework.amqp: ${LOG_LEVEL:DEBUG}
     com.rabbitmq: DEBUG
   file:
     name: logs/auth-service.log
@@ -68,5 +89,34 @@ logging:
     file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
 
 user-service:
-  url: ${USER_SERVICE_URL:http://localhost:8081}
-  
+  url: ${USER_SERVICE_URL:http://localhost:8080}
+
+authorization-service:
+  url: ${AUTHORIZATION_SERVICE_URL:http://localhost:8082}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  liquibase:
+    parameters:
+      secureParsing: false
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+  liquibase:
+    parameters:
+      secureParsing: true
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false

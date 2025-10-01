@@ -15,4 +15,6 @@ public interface AuthUserRepository extends JpaRepository<AuthUser, Integer> {
     Optional<AuthUser> findByEmailVerificationToken(String token);
 
     Optional<AuthUser> findByResetPasswordToken(String token);
+
+    boolean existsByUserId(Integer userId);
 }

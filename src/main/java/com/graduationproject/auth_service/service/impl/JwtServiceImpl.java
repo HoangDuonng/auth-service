@@ -1,6 +1,6 @@
 package com.graduationproject.auth_service.service.impl;
 
-import com.graduationproject.auth_service.dto.response.UserResponseDTO;
+import com.graduationproject.common.dto.UserResponseDTO;
 import com.graduationproject.auth_service.service.JwtService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -15,17 +15,39 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class JwtServiceImpl implements JwtService {
+
     @Value("${jwt.secret}")
     private String secretKey;
 
     @Value("${jwt.expiration}")
     private long jwtExpiration;
 
+    @Value("${jwt.key-id}")
+    private String keyId;
+
+    @Value("${jwt.issuer}")
+    private String issuer;
+
+    // Log secret key
+    @PostConstruct
+    public void logSecretKey() {
+        log.info("Secret key: {}", secretKey);
+        log.info("Key ID: {}", keyId);
+        log.info("Issuer: {}", issuer);
+    }
+
     @Override
-    public String generateToken(UserResponseDTO user) {
-        return generateToken(new HashMap<>(), user);
+    public String generateToken(UserResponseDTO user, java.util.List<String> roles) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("roles", roles);
+        claims.put("iss", issuer);
+        return generateToken(claims, user);
     }
 
     @Override
@@ -37,9 +59,9 @@ public class JwtServiceImpl implements JwtService {
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token);
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token);
             return true;
         } catch (Exception e) {
             return false;
@@ -53,6 +75,7 @@ public class JwtServiceImpl implements JwtService {
 
     private String generateToken(Map<String, Object> extraClaims, UserResponseDTO user) {
         return Jwts.builder()
+                .setHeaderParam("kid", keyId)
                 .setClaims(extraClaims)
                 .setSubject(user.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
@@ -78,4 +101,4 @@ public class JwtServiceImpl implements JwtService {
         byte[] keyBytes = secretKey.getBytes();
         return Keys.hmacShaKeyFor(keyBytes);
     }
-} 
+}

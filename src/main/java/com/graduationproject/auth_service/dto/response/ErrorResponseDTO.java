@@ -9,10 +9,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserResponseDTO {
-    private Integer id;
-    private String username;
-    private String email;
-    private Boolean isActivated;
-    private Boolean isDeleted;
+public class ErrorResponseDTO {
+    private boolean success;
+    private String message;
+    private String errorCode;
+    private long timestamp;
 }
